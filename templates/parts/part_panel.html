@@ -1,9 +1,7 @@
-{% load part_info %}
 <div class="col-md-6">
     <div class="panel panel-default">
         <div class="panel-heading">
                 <span class="label label-success" style="font-size: large">{{ part_id|part_name }}</span>
-                <span class="label label-default" style="font-size: large"><span id="part_{{ part_id }}"></span>/{{ part_id|part_range }}</span>
         </div>
         <div class="panel-body">
             <button type="button" class="btn btn-default btnDown" data-part-id="{{ part_id }}" data-duration="{{ BASE_DURATION }}" data-action="decr">

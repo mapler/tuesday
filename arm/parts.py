@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-from django.conf import settings
+import config as settings
 
-from arm.constants import PART_NAME_DICT, PART_RANGE_DICT
-from arm.constants import (
+from constants import (
+    PART_NAME_DICT,
     PART_BASE,
     PART_ELBOW,
     PART_GRIPS,
@@ -10,14 +10,12 @@ from arm.constants import (
     PART_SHOULDER,
     PART_WRIST
 )
-from device import ArmDevice, DeviceFetchTimeout
-from arm.models.status import StatusMixin
+from device import ArmDevice, DeviceFetchTimeout, USBError
 
 
-class ArmPartBase(StatusMixin):
+class ArmPartBase(object):
 
     PART_ID = None
-    MIN = 0
 
     def __init__(self):
         self.part_name = PART_NAME_DICT.get(self.PART_ID)
@@ -26,30 +24,28 @@ class ArmPartBase(StatusMixin):
     def arm(self):
         return ArmDevice.arm()
 
+    @property
+    def can_action(self):
+        return ArmDevice.is_on()
+
     def action(self, duration):
         is_acted = False
-        if self.can_action(duration):
-            if hasattr(settings, 'ARM_DEBUG') and settings.ARM_DEBUG:
+        if self.can_action:
+            if settings.ARM_DEBUG:
                 is_acted = True
             else:
                 try:
                     is_acted = self._action(duration)
-                except:
-                    # 尝试一次重新获取设备
+                except USBError:
                     try:
                         ArmDevice.fetch_for_loop()
                         is_acted = self._action(duration)
                     except DeviceFetchTimeout:
-                        # error发生切再次获取设备超时时，给部件发送停止信号
                         self.stop()
-                        # todo write log
-            if is_acted:
-                self.status.incr(duration)
-                # todo write log
         return is_acted
 
     def stop(self):
-        if hasattr(settings, 'ARM_DEBUG') and settings.ARM_DEBUG:
+        if settings.ARM_DEBUG:
             return True
         if self.arm:
             is_stop = self._stop()
@@ -80,7 +76,6 @@ class ArmPartBase(StatusMixin):
 class ArmGrips(ArmPartBase):
 
     PART_ID = PART_GRIPS
-    MAX = PART_RANGE_DICT.get(PART_ID, 0)
 
     def _increase(self, duration):
         return self.arm.grips.open(duration)
@@ -90,15 +85,11 @@ class ArmGrips(ArmPartBase):
 
     def _stop(self):
         return self.arm.grips.stop()
-
-    def _block(self, duration):
-        pass
     
     
 class ArmWrist(ArmPartBase):
 
     PART_ID = PART_WRIST
-    MAX = PART_RANGE_DICT.get(PART_ID, 0)
 
     def _increase(self, duration):
         return self.arm.wrist.up(duration)
@@ -109,14 +100,10 @@ class ArmWrist(ArmPartBase):
     def _stop(self):
         return self.arm.wrist.stop()
 
-    def _block(self, duration):
-        pass
-
 
 class ArmElbow(ArmPartBase):
 
     PART_ID = PART_ELBOW
-    MAX = PART_RANGE_DICT.get(PART_ID, 0)
 
     def _increase(self, duration):
         return self.arm.elbow.up(duration)
@@ -126,15 +113,11 @@ class ArmElbow(ArmPartBase):
 
     def _stop(self):
         return self.arm.elbow.stop()
-
-    def _block(self, duration):
-        pass    
     
     
 class ArmShoulder(ArmPartBase):
 
     PART_ID = PART_SHOULDER
-    MAX = PART_RANGE_DICT.get(PART_ID, 0)
 
     def _increase(self, duration):
         return self.arm.shoulder.up(duration)
@@ -145,14 +128,10 @@ class ArmShoulder(ArmPartBase):
     def _stop(self):
         return self.arm.shoulder.stop()
 
-    def _block(self, duration):
-        pass
-    
 
 class ArmBase(ArmPartBase):
 
     PART_ID = PART_BASE
-    MAX = PART_RANGE_DICT.get(PART_ID, 0)
 
     def _increase(self, duration):
         return self.arm.base.rotate_clock(duration)
@@ -163,14 +142,10 @@ class ArmBase(ArmPartBase):
     def _stop(self):
         return self.arm.base.stop()
 
-    def _block(self, duration):
-        pass
-
 
 class ArmLed(ArmPartBase):
 
     PART_ID = PART_LED
-    MAX = PART_RANGE_DICT.get(PART_ID, 0)
 
     def _increase(self, duration):
         return self.arm.led.on()
@@ -180,6 +155,3 @@ class ArmLed(ArmPartBase):
 
     def _stop(self):
         return self.arm.led.stop()
-
-    def _block(self, duration):
-        pass

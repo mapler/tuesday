@@ -3,6 +3,6 @@ A Web Client of [OWI Robotic Edge Arm](http://www.owirobot.com/robotic-arm-edge-
 based on [Roboarm](https://github.com/nvbn/roboarm).
 
 ## TODO
-* Message queue for Multi-Controlling
+* Multi-Controlling
 * Test Code
 * ...
