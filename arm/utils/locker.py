@@ -27,13 +27,11 @@ class Locker(object):
 
     def on_lock(self, func):
         def wrapper(*args, **kwargs):
-            if self.is_lock():
-                return
-            self.lock()
-            try:
-                return func(*args, **kwargs)
-            except Exception as e:
-                raise e
-            finally:
-                self.unlock()
+            if self.lock():
+                try:
+                    return func(*args, **kwargs)
+                except Exception as e:
+                    raise e
+                finally:
+                    self.unlock()
         return wrapper
