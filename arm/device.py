@@ -7,7 +7,7 @@ from usb import USBError
 import config
 
 from constants import DEVICE_STATUS_KEY, STATUS_ON, STATUS_OFF, FETCH_TIMEOUT
-from utils.kvs import CacheKvs
+from utils.kvs import Kvs
 
 
 class DeviceFetchTimeout(Exception):
@@ -22,7 +22,7 @@ class ArmDevice(object):
     an device obj
     interact with the usb device
     """
-    status_cache = CacheKvs(DEVICE_STATUS_KEY)
+    status = Kvs(DEVICE_STATUS_KEY)
 
     @classmethod
     def arm(cls):
@@ -32,15 +32,15 @@ class ArmDevice(object):
         return arm
 
     @classmethod
-    def status(cls):
+    def get_status(cls):
         cls.fetch()
         if config.ARM_DEBUG:
             return True
-        return int(cls.status_cache.get())
+        return int(cls.status.get())
 
     @classmethod
     def is_on(cls):
-        return bool(cls.status())
+        return bool(cls.get_status())
 
     @classmethod
     def fetch(cls):
@@ -50,10 +50,10 @@ class ArmDevice(object):
         """
         try:
             arm = RoboArm()
-            cls.status_cache.set(STATUS_ON)
+            cls.status.set(STATUS_ON)
             return arm
         except (USBError, DeviceNotFound) as e:
-            cls.status_cache.set(STATUS_OFF)
+            cls.status.set(STATUS_OFF)
 
     @classmethod
     def fetch_for_loop(cls):
