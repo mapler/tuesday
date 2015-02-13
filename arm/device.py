@@ -26,7 +26,7 @@ class ArmDevice(object):
 
     @classmethod
     def arm(cls):
-        if config.ARM_DEBUG:
+        if config.DEVICE_DEBUG:
             return
         arm = cls.fetch_for_loop()
         return arm
@@ -34,7 +34,7 @@ class ArmDevice(object):
     @classmethod
     def get_status(cls):
         cls.fetch()
-        if config.ARM_DEBUG:
+        if config.DEVICE_DEBUG:
             return True
         return int(cls.status.get())
 

@@ -31,7 +31,7 @@ class ArmPartBase(object):
     def action(self, duration):
         is_acted = False
         if self.can_action:
-            if settings.ARM_DEBUG:
+            if settings.DEVICE_DEBUG:
                 is_acted = True
             else:
                 try:
@@ -45,7 +45,7 @@ class ArmPartBase(object):
         return is_acted
 
     def stop(self):
-        if settings.ARM_DEBUG:
+        if settings.DEVICE_DEBUG:
             return True
         if self.arm:
             is_stop = self._stop()
