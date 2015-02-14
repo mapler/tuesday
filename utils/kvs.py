@@ -7,15 +7,41 @@ _pool = redis.ConnectionPool(
         port=REDIS_CONF['port'],
         db=REDIS_CONF['db'],
         )
-_redis = redis.Redis(connection_pool=_pool)
+redis = redis.Redis(connection_pool=_pool)
+
+
+def _with_expires(command):
+    """
+    Execute redis command and 
+    Keeping updated expires if object's expires was set.
+    """
+    def wrapper(obj, *args, **kwargs):
+        if obj.expires:
+            # monkey patch obj's handler to pipeline.
+            _handler = obj.handler
+            obj.handler = obj.pipe
+            pipe = command(obj, *args, **kwargs)
+            obj.handler = _handler
+            if pipe:
+                pipe.expire(obj.key, obj.expires)
+                ret = pipe.execute()[:-1]  # exclude the expire_set result
+                if len(ret) == 1:
+                    return ret[0]
+                else:
+                    return ret
+        else:
+            return command(obj, *args, **kwargs)
+    return wrapper
+
 
 class Kvs(object):
 
     def __init__(self, key, expires=None):
         self._key = key
-        self._redis = _redis
-        self._pipe = self._redis.pipeline()
+        self.redis = redis
+        self.pipe = self.redis.pipeline()
         self._expires = expires if expires else None
+        self.handler = self.redis
 
     @property
     def key(self):
@@ -26,43 +52,53 @@ class Kvs(object):
         return self._expires
 
     def get(self):
-        return self._redis.get(self.key)
+        return self.handler.get(self.key)
 
+    @_with_expires
     def set(self, value, nx=False):
-        return self._redis.set(self.key, value, ex=self.expires, nx=nx)
+        return self.handler.set(self.key, value, ex=self.expires, nx=nx)
 
     def set_expires(self, ex):
         self._expires = ex
-        return self._redis.expire(self.key, self.expires)
+        return self.handler.expire(self.key, self.expires)
 
-    def _incr_with_expires(self, key, amount=1):
-        """
-        Called only if self.expires is not None
-        """
-        self._pipe.incr(key, amount)
-        self._pipe.expire(key, self.expires)
-        return self._pipe.execute()
+    def ttl(self):
+        ttl = self.handler.ttl(self.key)
+        return ttl if ttl else 0
 
-    def _decr_with_expires(self, key, amount=1):
-        """
-        Called only if self.expires is not None
-        """
-        self._pipe.decr(key, amount)
-        self._pipe.expire(key, self.expires)
-        return self._pipe.execute()
- 
+    @_with_expires
     def incr(self, amount=1):
-        if self.expires:
-            return self._incr_with_expires(self.key, amount)
-        else:
-            return self._redis.incr(self.key, amount)
-
+        return self.handler.incr(self.key, amount)
+ 
+    @_with_expires
     def decr(self, amount=1):
-        if self.expires:
-            return self._decr_with_expires(self.key, amount)
-        else:
-            return self._redis.decr(self.key, amount)
-        
-    def delete(self):
-        return self._redis.delete(self.key)
+        return self.handler.decr(self.key, amount)
 
+    def hget(self, key):
+        return self.handler.hget(self.key, key)
+    
+    @_with_expires
+    def hset(self, key, value, nx=False):
+        if nx:
+            return self.handler.hsetnx(self.key, key, value)
+        else:
+            return self.handler.hset(self.key, key, value)
+
+    def hgetall(self):
+        return self.handler.hgetall(self.key)
+
+    def hkeys(self):
+        return self.handler.hkeys(self.key)
+
+    def hmget(self, keys, *args):
+        return self.handler.hmget(self.key, keys, *args)
+
+    @_with_expires
+    def hmset(self, mapping, nx=False):
+        if nx and self.redis.exists(self.key):
+            return
+        else:
+            return self.handler.hmset(self.key, mapping)
+
+    def delete(self):
+        return self.handler.delete(self.key)
