@@ -1,7 +1,7 @@
 <div class="col-md-6">
     <div class="panel panel-default">
         <div class="panel-heading">
-                <span class="label label-success" style="font-size: large">{{ part_id|part_name }}</span>
+                <span class="arm_status label label-default" style="font-size: large">{{ part_id|part_name }}</span>
         </div>
         <div class="panel-body">
             <button type="button" class="btn btn-default btnDown" data-part-id="{{ part_id }}" data-duration="{{ BASE_DURATION }}" data-action="decr">
@@ -12,9 +12,6 @@
                 {% elif part_id|type_is_swing_h %}
                 <span class="glyphicon glyphicon-circle-arrow-left"></span> Left
                 {% endif %}
-            </button>
-            <button type="button" class="btn btn-default btnStop" data-part-id="{{ part_id }}" data-duration="{{ 0 }}" data-action="stop">
-                <span class="glyphicon glyphicon-stop"></span> Stop
             </button>
             <button type="button" class="btn btn-default btnUp" data-part-id="{{ part_id }}" data-duration="{{ BASE_DURATION }}" data-action="incr">
                 {% if part_id|type_is_switch %}

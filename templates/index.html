@@ -22,10 +22,34 @@
         <div class="page-header">
           <h1>Tuesday <small>a web controller of Robotic Edge Arm</small></h1>
         </div>
-        <div class="well">
-            <span class="label label-default" style="font-size: large">STATUS:</span>
-            <span id="arm_status" class="label" style="font-size: large"> </span>
-        </div>
+        {% for message in get_flashed_messages() %}
+          <div class='alert alert-info' role="alert">{{ message }}</div>
+        {% endfor %}
+        {% if power_on %}
+          {% if user_in_use %}
+            <h4 >
+              {% if not current_user.is_active() %}
+              <span class='text-success'>{{ user_in_use.name }}-san</span> is using. Please wait...
+              {% else %}<span class='text-success'>You</span> are using.
+              {% endif %}
+            </h4>
+            <div class="progress">
+              <div class="progress-bar progress-bar-success" id='counter' role="progressbar" aria-valuenow="{{ user_ttl }} " aria-valuemin="0" aria-valuemax="{{ SESSION_EXPIRES }}" style="width: {{ user_ttl_percent }}%">remain {{ user_ttl }}s</div>
+            </div>
+          {% else %}
+            <div class='panel panel-default'>
+              <form role="form" action='{{ url_for('login') }}' method='POST'>
+                {{ login_form.csrf_token }}
+                <div class="input-group">
+                  <input type="text" class="form-control" id='name' name='name' placeholder="Enter a Name to start" aria-describedby="basic-addon1">
+                  <span class="input-group-btn"><button class="btn btn-default" type="submit">Submit</button></span>
+                </div>
+              </form>
+            </div>
+          {% endif %}
+        {% else %}
+          <div class='alert alert-warning' role='alert'>Device is Power Off.</div>
+        {% endif %}
 
         <div class="row">
         {% for part_id in part_ids %}
@@ -47,11 +71,6 @@
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
     <script src="{{ STATIC_URL }}js/bootstrap.js"></script>
     <script src="{{ STATIC_URL }}js/arm.js"></script>
-    <script>
-      $.ajaxSetup({data: {
-        csrfmiddlewaretoken: '{{ csrf_token }}'
-      }});
-    </script>
   </body>
 </html>
 

@@ -1,4 +1,4 @@
-// js 初学者, 请多多指点
+// js beginner
 
 function getJSONnoCache(url, data, success){
     $.ajax({
@@ -11,21 +11,18 @@ function getJSONnoCache(url, data, success){
 }
 
 function reloadArmStatus(data) {
-    if (data.is_on) {
-        $("#arm_status").removeClass('glyphicon glyphicon-minus-sign label-default');
-        $("#arm_status").addClass('glyphicon glyphicon-ok-sign label-success');
+    if (data.power_on) {
+        $(".arm_status").removeClass('label-default');
+        $(".arm_status").addClass('label-success');
     }
     else {
-        $("#arm_status").removeClass('glyphicon glyphicon-ok-sign label-success');
-        $("#arm_status").addClass('glyphicon glyphicon-minus-sign label-default');
-    }
-    if (data.message != null){
-        $("#message").text(data.message);
+        $(".arm_status").removeClass('label-success');
+        $(".arm_status").addClass('label-default');
     }
 }
 
 function getArmStatus(){
-    getJSONnoCache('/arm/status/', {}, reloadArmStatus)
+    getJSONnoCache('/api/arm/', {}, reloadArmStatus)
 }
 
 
@@ -34,7 +31,7 @@ function actionArmPart(part_id, duration, action){
         'duration': duration,
         'action': action
     };
-    $.post('/arm/status/'+ part_id + '/', post_data, reloadArmStatus);
+    $.post('/api/arm/'+ part_id + '/', post_data, reloadArmStatus);
 }
 
 $('.btn').click(function(){
@@ -42,6 +39,50 @@ $('.btn').click(function(){
 });
 
 
+function fadeFlashedMessage(){
+    $('.alert-info').fadeOut(2000);
+};
+
+
+function progressCounter(){
+  counter = $('#counter');
+  process_value = counter.attr('aria-valuenow');
+  process_max = counter.attr('aria-valuemax');
+  start_count = false;
+  interval = setInterval(function() {
+    process_value--;
+    percent = 100 * process_value / process_max;
+    if (percent > 0) {
+      start_count = true;
+      counter.attr('aria-valuenow', process_value);
+      counter.width(percent + '%');
+      counter.text('remain ' + process_value + 's');
+    }
+    if (percent <= 20) {
+      counter.removeClass('progress-bar-success');
+      counter.addClass('progress-bar-warning');
+    }
+    if (percent <= 5) {
+      counter.removeClass('progress-bar-success');
+      counter.removeClass('progress-bar-warning');
+      counter.addClass('progress-bar-danger');
+    }
+    if (percent <= 0) {
+	clearInterval(interval);
+	if (start_count == true) {
+	    counter.width('100%');
+	    counter.text('Time Up. Reloading...');
+	    setTimeout(function(){
+	        location.reload();
+	    }, 2000);
+	}
+    }
+  }, 1000);
+};
+
+
 jQuery(document).ready(function(){
+    fadeFlashedMessage();
     getArmStatus();
+    progressCounter();
 });
