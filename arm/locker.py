@@ -4,7 +4,7 @@ from utils.kvs import Kvs
 
 class Locker(object):
     """
-    locker for move the locker
+    Redis locker
     """
 
     LOCKER_KEY = 'locker'
@@ -23,6 +23,7 @@ class Locker(object):
         return self.locker.delete()
 
 arm_locker = Locker('arm')
+
 
 def on_lock(func):
     def wrapper(*args, **kwargs):

@@ -34,7 +34,7 @@ function actionArmPart(part_id, duration, action){
     $.post('/api/arm/'+ part_id + '/', post_data, reloadArmStatus);
 }
 
-$('.btn').click(function(){
+$('.btnAction').click(function(){
    actionArmPart($(this).data('part-id'), $(this).data('duration'), $(this).data('action'))
 });
 

@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
-from flask import url_for, redirect, flash
-from flask.ext.login import LoginManager, login_user, logout_user, current_user, login_required, UserMixin
+from flask import url_for, redirect
+from flask.ext.login import LoginManager, login_user, logout_user, login_required
 from tuesday import app
-from utils.kvs import Kvs
 from user import user_manager
 from form import LoginForm
 

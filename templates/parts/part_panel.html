@@ -4,7 +4,7 @@
                 <span class="arm_status label label-default" style="font-size: large">{{ part_id|part_name }}</span>
         </div>
         <div class="panel-body">
-            <button type="button" class="btn btn-default btnDown" data-part-id="{{ part_id }}" data-duration="{{ BASE_DURATION }}" data-action="decr">
+            <button type="button" class="btn btn-default btnAction btnDown" data-part-id="{{ part_id }}" data-duration="{{ BASE_DURATION }}" data-action="decr">
                 {% if part_id|type_is_switch %}
                 <span class="glyphicon glyphicon-resize-small"></span> Close
                 {% elif part_id|type_is_swing_v %}
@@ -13,7 +13,7 @@
                 <span class="glyphicon glyphicon-circle-arrow-left"></span> Left
                 {% endif %}
             </button>
-            <button type="button" class="btn btn-default btnUp" data-part-id="{{ part_id }}" data-duration="{{ BASE_DURATION }}" data-action="incr">
+            <button type="button" class="btn btn-default btnAction btnUp" data-part-id="{{ part_id }}" data-duration="{{ BASE_DURATION }}" data-action="incr">
                 {% if part_id|type_is_switch %}
                 <span class="glyphicon glyphicon-resize-full"></span> Open
                 {% elif part_id|type_is_swing_v %}

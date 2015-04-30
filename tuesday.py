@@ -1,11 +1,11 @@
-# -*- coding: utf-8 -*-
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 from flask import Flask
-from config import *
+import config
 import os
 
 app = Flask(__name__)
-app.debug = DEBUG
+app.debug = config.DEBUG
 
 if 'ARM_APP_SECRET_KEY' in os.environ:
     app.secret_key = os.environ['ARM_APP_SECRET_KEY']

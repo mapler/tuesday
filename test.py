@@ -17,23 +17,24 @@ class KvsTestCase(unittest.TestCase):
 
     def test_hmset(self):
         ret = self.kvs.hmset(self.data)
-        assert ret == True
+        assert ret is True
         assert self.kvs.hgetall() == self.data
         ret = self.kvs.hmset(self.data2)
-        assert ret == True
+        assert ret is True
         data = self.data
         data.update(self.data2)
         assert self.kvs.hgetall() == data
 
     def test_hmset_nx(self):
         ret = self.kvs.hmset(mapping=self.data)
-        assert ret == True
+        assert ret is True
         assert self.kvs.hgetall() == self.data
         ret = self.kvs.hmset(mapping=self.data2, nx=True)
         data = self.data
         data.update(self.data2)
         assert self.kvs.hgetall() != data
-        assert ret == None
+        assert ret is None
+
 
 class KvsTestCaseWithSession(KvsTestCase):
 
@@ -44,8 +45,7 @@ class KvsTestCaseWithSession(KvsTestCase):
 
     def test_hmset_session(self):
         ret = self.kvs.hmset(mapping=self.data)
-        assert ret == True
+        assert ret is True
         assert self.kvs.hgetall() == self.data
         time.sleep(1)
-        assert self.kvs.get() == None
- 
+        assert self.kvs.get() is None

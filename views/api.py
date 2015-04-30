@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
-from flask import url_for, jsonify, request, flash
+from flask import jsonify, request
 from flask.ext.login import login_required
-from config import *
 from arm import ArmManager
 from tuesday import app
 from views.login import login_manager
@@ -40,18 +39,16 @@ def get_status(part_id=None):
 @login_required
 def post_action(part_id=None):
 
-    duration = request.form.get('duration', 0)
-    part_ids = ArmManager.parts.keys()
+    duration = int(request.form.get('duration', 0))
 
     if part_id and duration:
         part_id = int(part_id)
-        duration = int(duration)
 
         action = request.form.get('action')
         try:
-            is_acted = getattr(ArmManager, action)(part_id, duration)
+            getattr(ArmManager, action)(part_id, duration)
         except AttributeError:
-            is_acted = False
+            pass
 
     context = _get_context_data()
     return _response_json(context)

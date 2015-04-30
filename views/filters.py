@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from tuesday import app
 from arm.constants import PART_NAME_DICT, PART_TYPE_DICT, \
-        PART_TYPE_SWITCH, PART_TYPE_SWING_V, PART_TYPE_SWING_H
+    PART_TYPE_SWITCH, PART_TYPE_SWING_V, PART_TYPE_SWING_H
 
 
 @app.template_filter(name='part_name')

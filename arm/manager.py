@@ -21,9 +21,6 @@ from locker import on_lock
 
 
 class ArmManager(object):
-    """
-    View 与 Model 之间的接口
-    """
     grips = ArmGrips()
     wrist = ArmWrist()
     elbow = ArmElbow()
@@ -68,8 +65,3 @@ class ArmManager(object):
     @classmethod
     def incr(cls, part_id, duration, *args):
         return cls._action(part_id, duration)
-
-    @classmethod
-    def stop(cls, part_id, *args):
-        for part in self.parts.values():
-           part.stop()
